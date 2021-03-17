@@ -331,9 +331,15 @@ var styleContent = `
     #fieldset_filter_dl2811 {
         position: relative;
     }
-    #tag_list {
+    .scrollAble {
         height: 140px;
         overflow-x: auto;
+    }
+    #btnReloadPreview {
+        padding: 5px;
+    }
+    .selectList {
+        width: 100%;
     }
     .tags_item_dl2811 {
         display: inline-block;
@@ -353,7 +359,7 @@ var formContent = `
 							<input type="url" id="page_url" value="" placeholder="Link fanpage">
 						</div>
 						<div class="col_dl2811 text-center">
-							<div class="btnGetIDFanpage" id="btnGetIDFanpage">&gt;&gt; Get ID Fanpage &gt;&gt;</div>
+							<div class="btnGetIDFanpage" id="btnGetIDFanpage">&gt;&gt; Lấy ID Fanpage &gt;&gt;</div>
 						</div>
 						<div class="col_dl2811">
 							<input type="text" id="page_id" value="" placeholder="ID fanpage">
@@ -389,7 +395,7 @@ var formContent = `
 							<div class="title_dl2811">
 								Nhãn: <input id="search_dl2811" placeholder="Tìm kiếm" onkeyup="search_tags_dl2811()">
 							</div>
-							<div id="tag_list">
+							<div id="tag_list" class="scrollAble">
                             </div>
 						</div>
 					</div>
@@ -399,7 +405,35 @@ var formContent = `
                         <div id="loadingFriendList"></div>
                     </div>
 				</fieldset>
-				
+
+                <fieldset id="fieldset_random_content_dl2811">
+                    <legend>Bảng dữ liệu nội dung ngẫu nhiên:</legend>
+                    <div class="filter_box_dl2811">
+                        <div class="col_dl2811" style="height: 220px">
+                            <div class="title_dl2811">Danh sách tên biến: </div>
+                            <select id="listContentKey" multiple size="7" class="selectList">
+                            </select>
+                            <input id="txtContentKey" placeholder="Tên biến" style="width: 100%; box-sizing: border-box;">
+                            <button class="reloadFriendList btn_dl2811" id="btnAddContentKey">Thêm biến</button>
+                            <button class="reloadFriendList btn_dl2811" id="btnDeleteContentKey" style="background-color: red;margin-right: 10px;">Xoá</button>
+                        </div>
+                        <div class="col_dl2811">
+                            <div class="title_dl2811">
+                                Danh sách nội dung biến:
+                            </div>
+                            <select id="listContentValue" multiple size="7" class="selectList">
+                            </select>
+                            <input id="txtContentValue" placeholder="Nội dung biến" style="width: 100%; box-sizing: border-box;">
+                            <button class="reloadFriendList btn_dl2811" id="btnAddContentValue">Thêm nội dung</button>
+                            <button class="reloadFriendList btn_dl2811" id="btnDeleteContentValue" style="background-color: red;margin-right: 10px;">Xoá</button>
+                        </div>
+                        <div class="col_dl2811">
+                            <div class="title_dl2811">Xem trước</div>
+                            <textarea id="previewContent" class="scrollAble" style="width:100%"></textarea>
+                            <button class="reloadFriendList btn_dl2811" id="btnReloadPreview">Tải lại</button>
+                        </div>
+                    </div>
+                </fieldset>
 				
 				<div id="table_dl2811">
 					<div id="footer_dl2811">
@@ -413,9 +447,9 @@ var formContent = `
 						<div class="title speed">Tốc độ gửi (giây): <input type="number" min="1" id="speed" value="5">
 						<div class="title">Nội dung tin nhắn:</div>
 						<textarea id="content_dl2811" cols="3" placeholder="Chào {fullname} !
-{new}
+{randomContent}
 Hello {fullname} !
-{new}
+{randomContent}
 Hello {fullname} ! Chúc mừng năm mới.
 Tiền vô như nước.
 "></textarea>
@@ -423,7 +457,7 @@ Tiền vô như nước.
                         <br/>
 						- <strong>{fullname}</strong> để tự điền tên của ban bè vào nội dung.
                         <br/>
-						- <strong>{new}</strong> để thêm một nội dung mới, script sẽ lấy ngẫu nhiên giữa các shortcode này.
+						- <strong>{randomContent}</strong> để thêm một nội dung mới, script sẽ lấy ngẫu nhiên giữa các shortcode này.
 						</div>
 						<div class="sendbtnbox">
 							<button class="btn_dl2811" id="btnStartSend" disabled>Gửi tin nhắn</button>
@@ -438,8 +472,10 @@ Tiền vô như nước.
 var userId;
 var fb_dtsg;
 var listUser;
-var successCount = 0;
-var errorCount = 0;
+var successCount = (typeof successCount !== 'undefined' ? successCount : 0);
+var errorCount = (typeof errorCount !== 'undefined' ? errorCount : 0);
+var initDone = (typeof initDone !== 'undefined' ? initDone : false);
+var listContent = (typeof listContent !== 'undefined' ? listContent : {});
 
 function checkValidCode(encodedString) {
     try {
@@ -576,6 +612,7 @@ function getListTag(pageId) {
         "credentials": "include"
     }).then(response => response.json()).then(function (data) {
         try {
+            document.getElementById("tag_list").innerHTML = '';
             data.data.page.custom_labels.edges.forEach(function (tag) {
                 document.getElementById("tag_list").innerHTML += `
             <div class="tags_item_dl2811" data-name="${tag.node.name}">
@@ -583,6 +620,7 @@ function getListTag(pageId) {
                 <label style="background-color:#${tag.node.label_color}">${tag.node.name}
                 </label>
             </div>
+            </br>
             `;
             });
         } catch (error) {
@@ -742,31 +780,62 @@ function sendMessage(recevierId, pageId, message) {
     });
 }
 
+function replacedText(message) {
+    var replacedMessage = message;
+    for (var content in listContent) {
+        var listContentValue = listContent[content];
+        console.log(listContentValue.length > 0);
+        if (listContentValue.length > 0) {
+            var randomContent = Math.floor(Math.random() * listContentValue.length);
+            replacedMessage = replacedMessage.replaceAll(
+                "{" + content + "}",
+                listContentValue[randomContent]
+            );
+        }
+    }
+    return replacedMessage;
+}
+
 function delaySending(count, pageId, message, delaySecond, keys, listUserLength) {
     if (count >= listUserLength) return;
+    var replacedMessage = message.replaceAll("{fullname}", listUser[keys[count]].full_name);
+    replacedMessage = replacedText(replacedMessage);
+    sendMessage(keys[count], pageId, replacedMessage);
     setTimeout(function () {
-        var replacedMessage = message.replaceAll("{fullname}", listUser[keys[count]].full_name);
-        sendMessage(keys[count], pageId, replacedMessage);
         delaySending(count + 1, pageId, message, delaySecond, keys, listUserLength);
     }, delaySecond * 1000);
 }
 
+function refreshPreview() {
+    var message = document.getElementById("content_dl2811").value;
+    document.getElementById("previewContent").innerHTML = replacedText(message);
+}
+
+function clearContentList() {
+    var listElement = document.getElementById("listContentValue");
+    var index, length = listElement.options.length - 1;
+    for (index = length; index >= 0; index--) {
+        listElement.remove(index);
+    }
+}
+
 function init() {
     console.clear();
+    if (initDone) return;
 
-    // while (true) {
-    //     var encodedString = prompt("Nhập mã phần mềm");
-    //     if (encodedString == null) {
-    //         return;
-    //     }
-    //     if (encodedString == "") {
-    //         alert("Vui lòng nhập mã để sử dụng phần mềm");
-    //         continue;
-    //     }
-    //     if (checkValidCode(encodedString)) {
-    //         break;
-    //     }
-    // }
+    while (true) {
+        var encodedString = prompt("Nhập mã phần mềm");
+        if (encodedString == null) {
+            return;
+        }
+        if (encodedString == "") {
+            alert("Vui lòng nhập mã để sử dụng phần mềm");
+            continue;
+        }
+        if (checkValidCode(encodedString)) {
+            break;
+        }
+    }
 
     appendContent();
 
@@ -830,6 +899,101 @@ function init() {
             alert("Danh sách gửi trống trơn à");
         }
     }
+
+    document.getElementById("btnAddContentKey").onclick = function () {
+        var contentKey = document.getElementById("txtContentKey").value;
+        if (contentKey && contentKey.trim()) {
+            if (!(contentKey in listContent)) {
+                var option = document.createElement("option");
+                option.value = contentKey;
+                option.text = contentKey;
+                listContent[contentKey] = [];
+                var listElement = document.getElementById("listContentKey");
+                listElement.options.add(option);
+                listElement.scrollTop = listElement.scrollHeight - listElement.clientHeight;
+                listElement.selectedIndex = listElement.length - 1;
+
+                clearContentList();
+                refreshPreview();
+            }
+        } else {
+            alert("Nhập tên biến vào ô input dùm nha");
+        }
+    }
+
+    document.getElementById("btnDeleteContentKey").onclick = function () {
+        var listContentKeyElement = document.getElementById("listContentKey");
+        if (listContentKeyElement.selectedOptions.length > 0) {
+            delete (listContent[listContentKeyElement.value]);
+            listContentKeyElement.remove(listContentKeyElement.selectedIndex);
+
+            clearContentList();
+            refreshPreview();
+        } else {
+            alert("Danh sách biến trống mà");
+        }
+    }
+
+    document.getElementById("listContentKey").onchange = function (value) {
+        clearContentList();
+        listContent[this.value].forEach(function (optionValue) {
+            var option = document.createElement("option");
+            option.value = optionValue;
+            option.text = optionValue;
+            listContentValue.options.add(option);
+        });
+    }
+
+    document.getElementById("btnAddContentValue").onclick = function () {
+        var listContentKeyOptions = document.getElementById("listContentKey").selectedOptions;
+        if (listContentKeyOptions.length > 0) {
+            var contentKey = listContentKeyOptions[0].value;
+            var contentValue = document.getElementById("txtContentValue").value;
+            if (contentValue && contentValue.trim()) {
+                if (listContent[contentKey].indexOf(contentValue) == -1) {
+                    var option = document.createElement("option");
+                    option.value = contentValue;
+                    option.text = contentValue;
+                    listContent[contentKey].push(contentValue);
+                    var listElement = document.getElementById("listContentValue");
+                    listElement.options.add(option);
+                    listElement.scrollTop = listElement.scrollHeight - listElement.clientHeight;
+                    listElement.selectedIndex = listElement.length - 1;
+                    refreshPreview();
+                }
+            } else {
+                alert("Nhập giá trị biến vào ô input dùm nha");
+            }
+        } else {
+            alert("Chọn tên biến cần để thêm giá trị đã nha");
+        }
+    }
+
+    document.getElementById("btnDeleteContentValue").onclick = function () {
+        var listContentValueElement = document.getElementById("listContentValue");
+        if (listContentValueElement.selectedOptions.length > 0) {
+            var listContentKeyElement = document.getElementById("listContentKey");
+            delete (listContent[listContentKeyElement.value][listContentValueElement.selectedIndex]);
+            listContentValueElement.remove(listContentValueElement.selectedIndex);
+            refreshPreview();
+        } else {
+            alert("Danh sách giá trị biến trống mà");
+        }
+    }
+
+    document.getElementById("btnReloadPreview").onclick = function () {
+        refreshPreview();
+    }
+
+    document.getElementById("btnReloadPreview").onclick = function () {
+        refreshPreview();
+    }
+
+    document.getElementById("content_dl2811").onkeypress = function () {
+        refreshPreview();
+    }
+
+    initDone = true;
 }
 
 init();
