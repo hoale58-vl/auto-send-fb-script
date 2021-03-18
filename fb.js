@@ -1,355 +1,365 @@
 
 var styleContent = `
-    input {
-        border: 1px solid #cacaca;
-        padding: 5px;
+	input {
+		border: 1px solid #cacaca;
+		padding: 5px;
+	}
+	.modal {
+		display: none;
+		position: fixed;
+		z-index: 99;
+		padding-top: 24px;
+		left: 0;
+		top: 0;
+		width: 100%;
+		height: 100%;
+		overflow: auto;
+		background-color: rgb(0, 0, 0);
+		background-color: rgba(0, 0, 0, 0.4);
+	}
+	.modal-content {
+		position: relative;
+		background-color: #fefefe;
+		margin: auto;
+		padding: 0;
+		border: 1px solid #888;
+		max-width: 90%;
+		width: 750px;
+		box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+		-webkit-animation-name: animatetop;
+		-webkit-animation-duration: 0.4s;
+		animation-name: animatetop;
+		animation-duration: 0.4s;
+	}
+	@-webkit-keyframes animatetop {
+		from {
+			top: -300px;
+			opacity: 0;
+		}
+		to {
+			top: 0;
+			opacity: 1;
+		}
+	}
+	@keyframes animatetop {
+		from {
+			top: -300px;
+			opacity: 0;
+		}
+		to {
+			top: 0;
+			opacity: 1;
+		}
+	}
+	.close {
+		color: white;
+		float: right;
+		font-size: 23px;
+		font-weight: bold;
+	}
+	.close:hover,
+	.close:focus {
+		color: #000;
+		text-decoration: none;
+		cursor: pointer;
+	}
+	.modal-header {
+		padding: 5px 16px;
+		background-color: #5c67b8;
+		color: white;
+	}
+	.modal-header h6 {
+		color: #fff;
+		font-size: 14px;
+		text-transform: uppercase;
+		display: inline-block;
+		padding: 5px 0;
+		margin: 0;
+		font-weight: 700;
+	}
+	.modal-body {
+		padding: 10px 16px;
+	}
+	.modalShow {
+		display: block !important;
+	}
+	#table_dl2811 {
+		width: 100%;
+	}
+	#table_dl2811 .avatar_dl2811 {
+		height: 35px;
+		vertical-align: middle;
+	}
+	#loadingFriendList {
+		text-align: left;
+		font-weight: 700;
+		color: green;
+		display: inline-block;
+		margin-right: 20px;
+		float: left;
+		padding: 5px 10px;
+	}
+	#table_dl2811 .row {
+		clear: both;
+	}
+	#listFriend_dl2811 {
+		min-height: 150px;
+		max-height: 250px;
+		overflow-y: auto;
+		overflow-x: hidden;
+	}
+	#listFriend_dl2811 .row .col,
+	#header_dl2811 .row .col {
+		display: table-cell;
+		padding: 3px;
+		vertical-align: middle;
+	}
+	#listFriend_dl2811 .row .col1,
+	#header_dl2811 .row .col1 {
+		width: 27px;
+	}
+	#listFriend_dl2811 .row .col2,
+	#header_dl2811 .row .col2 {
+		width: 80px;
+		text-align: center;
+	}
+	#listFriend_dl2811 .row .col3,
+	#header_dl2811 .row .col3 {
+		width: 200px;
+	}
+	#listFriend_dl2811 .row .col4,
+	#header_dl2811 .row .col4 {
+		width: 150px;
+	}
+	#listFriend_dl2811 .row .col5,
+	#header_dl2811 .row .col5 {
+		width: 100px;
+		text-align: center;
+	}
+	#listFriend_dl2811 .row .col6,
+	#header_dl2811 .row .col6 {
+		width: 100px;
+		text-align: center;
+	}
+	#header_dl2811 .col {
+		font-weight: 700;
+	}
+	#footer_dl2811 {
+		margin-top: 10px;
+	}
+	#footer_dl2811 .sendbtnbox {
+		text-align: center;
+	}
+	#footer_dl2811 textarea {
+		width: 100%;
+		height: 80px;
+	}
+	.btn_dl2811 {
+		font-size: 15px;
+		background-color: #5c67b8;
+		border: 1px solid #5c67b8;
+		color: #fff;
+		font-weight: 700;
+		padding: 5px 10px;
+		border-radius: 5px;
+		margin-top: 10px;
+		cursor: pointer;
+	}
+	.btn_dl2811 {
+		font-size: 15px;
+		background-color: #5c67b8;
+		border: 1px solid #5c67b8;
+		color: #fff;
+		font-weight: 700;
+		padding: 13px 20px;
+		border-radius: 5px;
+		margin-top: 10px;
+		cursor: pointer;
+	}
+	.totalSent {
+		font-weight: 700;
+		text-align: left;
+		font-size: 15px;
+		margin: 0px;
+		display: inline-block;
+	}
+	.totalSuccess {
+		color: green;
+	}
+	.totalError {
+		color: red;
+	}
+	.note_shortcode {
+		font-style: italic;
+		text-align: left;
+	}
+	#footer_dl2811 .title {
+		font-weight: 700;
+		text-align: left;
+	}
+	#footer_dl2811 .speed {
+		padding: 0 0 10px 0;
+	}
+	#footer_dl2811 #speed {
+		font-weight: 700;
+		text-align: center;
+		width: 50px;
+	}
+	#footer_dl2811 #speed2 {
+		font-weight: 700;
+		text-align: center;
+		width: 50px;
+	}
+	#footer_dl2811 #loop {
+		font-weight: 700;
+		text-align: center;
+		width: 50px;
+	}
+	#footer_dl2811 #looppause {
+		font-weight: 700;
+		text-align: center;
+		width: 50px;
+	}
+	.searchBox_dl2811 {
+		text-align: right;
+	}
+	#search_dl2811 {
+		text-align: right;
+	}
+	.inputImage {
+		padding: 0 0 10px 0;
+	}
+	.reloadFriendList {
+		display: inline-block;
+		font-weight: 700;
+		color: white;
+		user-select: none;
+		cursor: pointer;
+		background-color: #5c67b8;
+		padding: 5px 9px;
+		border-radius: 5px;
+		box-shadow: 1px 1px 1px #707070;
+		float: right;
+	}
+	.exportFriendList {
+		display: inline-block;
+		font-weight: 700;
+		color: white;
+		user-select: none;
+		cursor: pointer;
+		background-color: #28a789;
+		padding: 5px 9px;
+		border-radius: 5px;
+		box-shadow: 1px 1px 1px #707070;
+		float: right;
+		margin-left: 10px;
+	}
+	#leftLoopBox {
+		display: inline-block;
+		font-weight: 700;
+		color: red;
+	}
+	.filter_box_dl2811 .col_dl2811 {
+		width: 30%;
+		display: inline-block;
+		vertical-align: top;
+		padding: 0px 8px;
+		height: 190px;
+	}
+	.filter_box_dl2811 .title_dl2811 {
+		font-weight: 700;
+		margin-bottom: 5px;
+	}
+	#fieldset_page_box_dl2811 {
+		margin-bottom: 15px;
+	}
+	.page_box_dl2811 .col_dl2811 {
+		width: 30%;
+		display: inline-block;
+		vertical-align: top;
+		padding: 10px 8px;
+	}
+	.page_box_dl2811 .col_dl2811 input {
+		width: 100%;
+	}
+	.btnGetIDFanpage {
+		display: inline-block;
+		font-weight: 700;
+		color: white;
+		user-select: none;
+		cursor: pointer;
+		background-color: #5c67b8;
+		padding: 5px 9px;
+		border-radius: 5px;
+		box-shadow: 1px 1px 1px #707070;
+	}
+	.text-center {
+		text-align: center;
+	}
+	.date_lable {
+		text-align: left;
+		padding: 3px 0;
+	}
+	.filter_box_dl2811 input.page_url,
+	.filter_box_dl2811 input.page_page {
+		width: 90%;
+	}
+	button.btn_dl2811:disabled,
+	button.btn_dl2811[disabled] {
+		border: 1px solid #999999;
+		background-color: #cccccc;
+		color: #666666;
+	}
+	.exportOptionShow {
+		display: block !important;
+	}
+	.exportOption {
+		display: none;
+		position: absolute;
+		right: 11px;
+		bottom: -85px;
+		background-color: #5c67b8;
+		color: #fff;
+		text-align: right;
+		border-radius: 5px;
+		cursor: pointer;
+		width: 140px;
+	}
+	.optionItem {
+		padding: 8px 5px;
+	}
+	#fieldset_filter_dl2811 {
+		position: relative;
+	}
+	.scrollAble {
+		height: 140px;
+		overflow-x: auto;
+	}
+	#btnReloadPreview {
+		padding: 5px;
+	}
+	.selectList {
+		width: 100%;
+	}
+	.tags_item_dl2811 {
+		display: inline-block;
+	}
+    #btnStopSend {
+        background-color: red;
+        margin-right: 10px;
     }
-    .modal {
-        display: none;
-        position: fixed;
-        z-index: 99;
-        padding-top: 24px;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        overflow: auto;
-        background-color: rgb(0, 0, 0);
-        background-color: rgba(0, 0, 0, 0.4);
-    }
-    .modal-content {
-        position: relative;
-        background-color: #fefefe;
-        margin: auto;
-        padding: 0;
-        border: 1px solid #888;
-        max-width: 90%;
-        width: 750px;
-        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-        -webkit-animation-name: animatetop;
-        -webkit-animation-duration: 0.4s;
-        animation-name: animatetop;
-        animation-duration: 0.4s;
-    }
-    @-webkit-keyframes animatetop {
-        from {
-            top: -300px;
-            opacity: 0;
-        }
-        to {
-            top: 0;
-            opacity: 1;
-        }
-    }
-    @keyframes animatetop {
-        from {
-            top: -300px;
-            opacity: 0;
-        }
-        to {
-            top: 0;
-            opacity: 1;
-        }
-    }
-    .close {
-        color: white;
-        float: right;
-        font-size: 23px;
-        font-weight: bold;
-    }
-    .close:hover,
-    .close:focus {
-        color: #000;
-        text-decoration: none;
-        cursor: pointer;
-    }
-    .modal-header {
-        padding: 5px 16px;
-        background-color: #5c67b8;
-        color: white;
-    }
-    .modal-header h6 {
-        color: #fff;
-        font-size: 14px;
-        text-transform: uppercase;
-        display: inline-block;
-        padding: 5px 0;
-        margin: 0;
-        font-weight: 700;
-    }
-    .modal-body {
-        padding: 10px 16px;
-    }
-    .modalShow {
-        display: block !important;
-    }
-    #table_dl2811 {
-        width: 100%;
-    }
-    #table_dl2811 .avatar_dl2811 {
-        height: 35px;
-        vertical-align: middle;
-    }
-    #loadingFriendList {
-        text-align: left;
-        font-weight: 700;
-        color: green;
-        display: inline-block;
-        margin-right: 20px;
-        float: left;
-        padding: 5px 10px;
-    }
-    #table_dl2811 .row {
-        clear: both;
-    }
-    #listFriend_dl2811 {
-        min-height: 150px;
-        max-height: 250px;
-        overflow-y: auto;
-        overflow-x: hidden;
-    }
-    #listFriend_dl2811 .row .col,
-    #header_dl2811 .row .col {
-        display: table-cell;
-        padding: 3px;
-        vertical-align: middle;
-    }
-    #listFriend_dl2811 .row .col1,
-    #header_dl2811 .row .col1 {
-        width: 27px;
-    }
-    #listFriend_dl2811 .row .col2,
-    #header_dl2811 .row .col2 {
-        width: 80px;
-        text-align: center;
-    }
-    #listFriend_dl2811 .row .col3,
-    #header_dl2811 .row .col3 {
-        width: 200px;
-    }
-    #listFriend_dl2811 .row .col4,
-    #header_dl2811 .row .col4 {
-        width: 150px;
-    }
-    #listFriend_dl2811 .row .col5,
-    #header_dl2811 .row .col5 {
-        width: 100px;
-        text-align: center;
-    }
-    #listFriend_dl2811 .row .col6,
-    #header_dl2811 .row .col6 {
-        width: 100px;
-        text-align: center;
-    }
-    #header_dl2811 .col {
-        font-weight: 700;
-    }
-    #footer_dl2811 {
-        margin-top: 10px;
-    }
-    #footer_dl2811 .sendbtnbox {
-        text-align: center;
-    }
-    #footer_dl2811 textarea {
-        width: 100%;
-        height: 80px;
-    }
-    .btn_dl2811 {
-        font-size: 15px;
-        background-color: #5c67b8;
-        border: 1px solid #5c67b8;
-        color: #fff;
-        font-weight: 700;
-        padding: 5px 10px;
-        border-radius: 5px;
-        margin-top: 10px;
-        cursor: pointer;
-    }
-    .btn_dl2811 {
-        font-size: 15px;
-        background-color: #5c67b8;
-        border: 1px solid #5c67b8;
-        color: #fff;
-        font-weight: 700;
-        padding: 13px 20px;
-        border-radius: 5px;
-        margin-top: 10px;
-        cursor: pointer;
-    }
-    .totalSent {
-        font-weight: 700;
-        text-align: left;
-        font-size: 15px;
-        margin: 0px;
-        display: inline-block;
-    }
-    .totalSuccess {
-        color: green;
-    }
-    .totalError {
-        color: red;
-    }
-    .note_shortcode {
-        font-style: italic;
-        text-align: left;
-    }
-    #footer_dl2811 .title {
-        font-weight: 700;
-        text-align: left;
-    }
-    #footer_dl2811 .speed {
-        padding: 0 0 10px 0;
-    }
-    #footer_dl2811 #speed {
-        font-weight: 700;
-        text-align: center;
-        width: 50px;
-    }
-    #footer_dl2811 #speed2 {
-        font-weight: 700;
-        text-align: center;
-        width: 50px;
-    }
-    #footer_dl2811 #loop {
-        font-weight: 700;
-        text-align: center;
-        width: 50px;
-    }
-    #footer_dl2811 #looppause {
-        font-weight: 700;
-        text-align: center;
-        width: 50px;
-    }
-    .searchBox_dl2811 {
-        text-align: right;
-    }
-    #search_dl2811 {
-        text-align: right;
-    }
-    .inputImage {
-        padding: 0 0 10px 0;
-    }
-    .reloadFriendList {
-        display: inline-block;
-        font-weight: 700;
-        color: white;
-        user-select: none;
-        cursor: pointer;
-        background-color: #5c67b8;
-        padding: 5px 9px;
-        border-radius: 5px;
-        box-shadow: 1px 1px 1px #707070;
-        float: right;
-    }
-    .exportFriendList {
-        display: inline-block;
-        font-weight: 700;
-        color: white;
-        user-select: none;
-        cursor: pointer;
-        background-color: #28a789;
-        padding: 5px 9px;
-        border-radius: 5px;
-        box-shadow: 1px 1px 1px #707070;
-        float: right;
-        margin-left: 10px;
-    }
-    #leftLoopBox {
-        display: inline-block;
-        font-weight: 700;
-        color: red;
-    }
-    .filter_box_dl2811 .col_dl2811 {
-        width: 30%;
-        display: inline-block;
-        vertical-align: top;
-        padding: 0px 8px;
-        height: 190px;
-    }
-    .filter_box_dl2811 .title_dl2811 {
-        font-weight: 700;
-        margin-bottom: 5px;
-    }
-    #fieldset_page_box_dl2811 {
-        margin-bottom: 15px;
-    }
-    .page_box_dl2811 .col_dl2811 {
-        width: 30%;
-        display: inline-block;
-        vertical-align: top;
-        padding: 10px 8px;
-    }
-    .page_box_dl2811 .col_dl2811 input {
-        width: 100%;
-    }
-    .btnGetIDFanpage {
-        display: inline-block;
-        font-weight: 700;
-        color: white;
-        user-select: none;
-        cursor: pointer;
-        background-color: #5c67b8;
-        padding: 5px 9px;
-        border-radius: 5px;
-        box-shadow: 1px 1px 1px #707070;
-    }
-    .text-center {
-        text-align: center;
-    }
-    .date_lable {
-        text-align: left;
-        padding: 3px 0;
-    }
-    .filter_box_dl2811 input.page_url,
-    .filter_box_dl2811 input.page_page {
-        width: 90%;
-    }
-    button.btn_dl2811:disabled,
-    button.btn_dl2811[disabled] {
-        border: 1px solid #999999;
-        background-color: #cccccc;
-        color: #666666;
-    }
-    .exportOptionShow {
-        display: block !important;
-    }
-    .exportOption {
-        display: none;
-        position: absolute;
-        right: 11px;
-        bottom: -85px;
-        background-color: #5c67b8;
-        color: #fff;
-        text-align: right;
-        border-radius: 5px;
-        cursor: pointer;
-        width: 140px;
-    }
-    .optionItem {
-        padding: 8px 5px;
-    }
-    #fieldset_filter_dl2811 {
-        position: relative;
-    }
-    .scrollAble {
-        height: 140px;
-        overflow-x: auto;
-    }
-    #btnReloadPreview {
-        padding: 5px;
-    }
-    .selectList {
-        width: 100%;
-    }
-    .tags_item_dl2811 {
-        display: inline-block;
-    }
+    #btnStopSend:disabled,
+	#btnStopSend[disabled] {
+		background-color: lightcoral;
+		color: aliceblue;
+	}
 `;
 
 var formContent = `
 		  <div class="modal-content">
 			<div class="modal-header">
 			  <h6>Auto gửi tin nhắn cho Fanpage</h6>
+			  <h6 style="float: right;">Hỗ trợ Zalo: 089 9265710</h6>
 			</div>
 			<div class="modal-body">
 				<fieldset id="fieldset_page_box_dl2811">
@@ -391,58 +401,58 @@ var formContent = `
 							<input type="radio" name="gender" value="FEMALE">
 							<label for="female">Nữ</label>
 						</div>
-                        <div class="col_dl2811">
+						<div class="col_dl2811">
 							<div class="title_dl2811">
 								Nhãn: <input id="search_dl2811" placeholder="Tìm kiếm" onkeyup="search_tags_dl2811()">
 							</div>
 							<div id="tag_list" class="scrollAble">
-                            </div>
+							</div>
 						</div>
 					</div>
 
-                    <div>
-                        <button class="reloadFriendList btn_dl2811" id="btnReloadFriendList">Lọc danh sách khách hàng</button>
-                        <div id="loadingFriendList"></div>
-                    </div>
+					<div>
+						<button class="reloadFriendList btn_dl2811" id="btnReloadFriendList">Lọc danh sách khách hàng</button>
+						<div id="loadingFriendList"></div>
+					</div>
 				</fieldset>
 
-                <fieldset id="fieldset_random_content_dl2811">
-                    <legend>Bảng dữ liệu nội dung ngẫu nhiên:</legend>
-                    <div class="filter_box_dl2811">
-                        <div class="col_dl2811" style="height: 220px">
-                            <div class="title_dl2811">Danh sách tên biến: </div>
-                            <select id="listContentKey" multiple size="7" class="selectList">
-                            </select>
-                            <input id="txtContentKey" placeholder="Tên biến" style="width: 100%; box-sizing: border-box;">
-                            <button class="reloadFriendList btn_dl2811" id="btnAddContentKey">Thêm biến</button>
-                            <button class="reloadFriendList btn_dl2811" id="btnDeleteContentKey" style="background-color: red;margin-right: 10px;">Xoá</button>
-                        </div>
-                        <div class="col_dl2811">
-                            <div class="title_dl2811">
-                                Danh sách nội dung biến:
-                            </div>
-                            <select id="listContentValue" multiple size="7" class="selectList">
-                            </select>
-                            <input id="txtContentValue" placeholder="Nội dung biến" style="width: 100%; box-sizing: border-box;">
-                            <button class="reloadFriendList btn_dl2811" id="btnAddContentValue">Thêm nội dung</button>
-                            <button class="reloadFriendList btn_dl2811" id="btnDeleteContentValue" style="background-color: red;margin-right: 10px;">Xoá</button>
-                        </div>
-                        <div class="col_dl2811">
-                            <div class="title_dl2811">Xem trước</div>
-                            <textarea id="previewContent" class="scrollAble" style="width:100%"></textarea>
-                            <button class="reloadFriendList btn_dl2811" id="btnReloadPreview">Tải lại</button>
-                        </div>
-                    </div>
-                </fieldset>
+				<fieldset id="fieldset_random_content_dl2811">
+					<legend>Bảng dữ liệu nội dung ngẫu nhiên:</legend>
+					<div class="filter_box_dl2811">
+						<div class="col_dl2811" style="height: 220px">
+							<div class="title_dl2811">Danh sách tên biến: </div>
+							<select id="listContentKey" multiple size="7" class="selectList">
+							</select>
+							<input id="txtContentKey" placeholder="Tên biến" style="width: 100%; box-sizing: border-box;">
+							<button class="reloadFriendList btn_dl2811" id="btnAddContentKey">Thêm biến</button>
+							<button class="reloadFriendList btn_dl2811" id="btnDeleteContentKey" style="background-color: red;margin-right: 10px;">Xoá</button>
+						</div>
+						<div class="col_dl2811">
+							<div class="title_dl2811">
+								Danh sách nội dung biến:
+							</div>
+							<select id="listContentValue" multiple size="7" class="selectList">
+							</select>
+							<input id="txtContentValue" placeholder="Nội dung biến" style="width: 100%; box-sizing: border-box;">
+							<button class="reloadFriendList btn_dl2811" id="btnAddContentValue">Thêm nội dung</button>
+							<button class="reloadFriendList btn_dl2811" id="btnDeleteContentValue" style="background-color: red;margin-right: 10px;">Xoá</button>
+						</div>
+						<div class="col_dl2811">
+							<div class="title_dl2811">Xem trước</div>
+							<textarea id="previewContent" class="scrollAble" style="width:100%" disabled></textarea>
+							<button class="reloadFriendList btn_dl2811" id="btnReloadPreview">Tải lại</button>
+						</div>
+					</div>
+				</fieldset>
 				
 				<div id="table_dl2811">
 					<div id="footer_dl2811">
 						<p class="totalSent totalUser">Tổng gửi: <span id="totalSendCount"></span></p>
-                        <br/>
-                        <p class="totalSent totalSuccess">Thành công: <span id="totalSendSuccess"></span></p>
-                        <br/>
-                        <p class="totalSent totalError">Gửi lỗi: <span id="totalSendError"></span></p>
-                        <br/>
+						<br/>
+						<p class="totalSent totalSuccess">Thành công: <span id="totalSendSuccess"></span></p>
+						<br/>
+						<p class="totalSent totalError">Gửi lỗi: <span id="totalSendError"></span></p>
+						<br/>
 
 						<div class="title speed">Tốc độ gửi (giây): <input type="number" min="1" id="speed" value="5">
 						<div class="title">Nội dung tin nhắn:</div>
@@ -454,13 +464,14 @@ Hello {fullname} ! Chúc mừng năm mới.
 Tiền vô như nước.
 "></textarea>
 						<div class="note_shortcode">Mẹo! Bạn có thể dùng shortcode sau:
-                        <br/>
+						<br/>
 						- <strong>{fullname}</strong> để tự điền tên của ban bè vào nội dung.
-                        <br/>
+						<br/>
 						- <strong>{randomContent}</strong> để thêm một nội dung mới, script sẽ lấy ngẫu nhiên giữa các shortcode này.
 						</div>
 						<div class="sendbtnbox">
 							<button class="btn_dl2811" id="btnStartSend" disabled>Gửi tin nhắn</button>
+							<button class="btn_dl2811" id="btnStopSend" disabled>Dừng</button>
 						</div>
 					</div>
 				</div>
@@ -476,6 +487,7 @@ var successCount = (typeof successCount !== 'undefined' ? successCount : 0);
 var errorCount = (typeof errorCount !== 'undefined' ? errorCount : 0);
 var initDone = (typeof initDone !== 'undefined' ? initDone : false);
 var listContent = (typeof listContent !== 'undefined' ? listContent : {});
+var startIndex = (typeof startIndex !== 'undefined' ? startIndex : 0);
 
 function checkValidCode(encodedString) {
     try {
@@ -615,13 +627,13 @@ function getListTag(pageId) {
             document.getElementById("tag_list").innerHTML = '';
             data.data.page.custom_labels.edges.forEach(function (tag) {
                 document.getElementById("tag_list").innerHTML += `
-            <div class="tags_item_dl2811" data-name="${tag.node.name}">
-                <input type="checkbox" name="tag" value="${tag.node.id}">
-                <label style="background-color:#${tag.node.label_color}">${tag.node.name}
-                </label>
-            </div>
-            </br>
-            `;
+			<div class="tags_item_dl2811" data-name="${tag.node.name}">
+				<input type="checkbox" name="tag" value="${tag.node.id}">
+				<label style="background-color:#${tag.node.label_color}">${tag.node.name}
+				</label>
+			</div>
+			</br>
+			`;
             });
         } catch (error) {
             console.log(error);
@@ -784,7 +796,6 @@ function replacedText(message) {
     var replacedMessage = message;
     for (var content in listContent) {
         var listContentValue = listContent[content];
-        console.log(listContentValue.length > 0);
         if (listContentValue.length > 0) {
             var randomContent = Math.floor(Math.random() * listContentValue.length);
             replacedMessage = replacedMessage.replaceAll(
@@ -797,10 +808,26 @@ function replacedText(message) {
 }
 
 function delaySending(count, pageId, message, delaySecond, keys, listUserLength) {
-    if (count >= listUserLength) return;
+    if (count >= listUserLength || !document.getElementById("btnStartSend").disabled) {
+        if (count >= listUserLength) {
+            startIndex = 0;
+            console.log("Reset lại danh sách gửi");
+        }
+        if (!document.getElementById("btnStartSend").disabled) {
+            startIndex = count;
+            console.log("Danh sách gửi dừng tại user thứ " + count);
+        }
+        document.getElementById("btnStartSend").disabled = false;
+        document.getElementById("btnStartSend").innerText = "Gửi tin nhắn";
+        document.getElementById("btnStopSend").disabled = true;
+        return;
+    }
     var replacedMessage = message.replaceAll("{fullname}", listUser[keys[count]].full_name);
     replacedMessage = replacedText(replacedMessage);
     sendMessage(keys[count], pageId, replacedMessage);
+    console.log({
+        "count": count, "message": replacedMessage
+    });
     setTimeout(function () {
         delaySending(count + 1, pageId, message, delaySecond, keys, listUserLength);
     }, delaySecond * 1000);
@@ -842,6 +869,8 @@ function init() {
     document.getElementById("btnGetIDFanpage").onclick = function () {
         var pageUrl = document.getElementById("page_url").value;
         if (pageUrl) {
+            startIndex = 0;
+            console.log("Reset lại danh sách gửi");
             getFanPageId(pageUrl);
         } else {
             alert("Nhập page Url vào ô input dùm nha")
@@ -852,6 +881,8 @@ function init() {
         var pageId = document.getElementById("page_id").value;
         if (pageId) {
             this.disabled = true;
+            startIndex = 0;
+            console.log("Reset lại danh sách gửi");
             document.getElementById("btnStartSend").disabled = true;
             document.getElementById("loadingFriendList").innerText = "Đang tải dữ liệu, vui lòng chờ...";
             listUser = {};
@@ -877,15 +908,14 @@ function init() {
                     if (pageId) {
                         successCount = 0;
                         errorCount = 0;
-                        this.disabled = true;
-                        this.textContent = "Đang gửi tin";
                         try {
-                            delaySending(0, pageId, message, delay, Object.keys(listUser), listUserLength);
+                            this.disabled = true;
+                            this.innerText = "Đang gửi...";
+                            document.getElementById("btnStopSend").disabled = false;
+                            delaySending(startIndex, pageId, message, delay, Object.keys(listUser), listUserLength);
                         } catch (err) {
                             console.log(err);
                         }
-                        this.disabled = false;
-                        this.textContent = "Gửi tin nhắn";
                     } else {
                         alert("Vui lòng điền tốc độ gửi vào ô tốc độ!");
                     }
@@ -989,8 +1019,18 @@ function init() {
         refreshPreview();
     }
 
-    document.getElementById("content_dl2811").onkeypress = function () {
+    document.getElementById("content_dl2811").onkeyup = function () {
+        startIndex = 0;
+        console.log("Reset lại danh sách gửi");
         refreshPreview();
+    }
+
+    document.getElementById("btnStopSend").onclick = function () {
+        if (document.getElementById("btnStartSend").disabled) {
+            document.getElementById("btnStartSend").disabled = false;
+            document.getElementById("btnStartSend").innerText = "Gửi tin nhắn";
+            this.disabled = true;
+        }
     }
 
     initDone = true;
