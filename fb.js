@@ -1,4 +1,3 @@
-
 var styleContent = `
 	input {
 		border: 1px solid #cacaca;
@@ -844,6 +843,33 @@ function clearContentList() {
     for (index = length; index >= 0; index--) {
         listElement.remove(index);
     }
+}
+
+function getListFriend(){
+    fetch("https://www.facebook.com/api/graphql/", {
+    "headers": {
+        "accept": "*/*",
+        "accept-language": "vi,en;q=0.9",
+        "content-type": "application/x-www-form-urlencoded",
+        "sec-fetch-dest": "empty",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "same-origin"
+    },
+    "referrer": "https://www.facebook.com/leviet.hoa.5/friends",
+    "referrerPolicy": "no-referrer-when-downgrade",
+    "body": "av=100002494886232&__user=100002494886232&__a=1&__dyn=7AzHJ16U9ob8ng9odoyGxu4VuC0BVU98nwgU29zEdE98K2aew9G2Saxa1Az8bo6u3y4o2Gwfi0LVEtwMw65xOfwwwto88427Uy11xmfz81sbzoaEaoG0Boy1PwBgK7qxS18wc61axe3e9xy48aU5qfK6E7e58jwGzEaE5e7oqBwJK5Umxm5oe8aUlxfxmu3W2i4U722u8wywLwcCmfw&__csr=gvEagDbfftiiNuPiNccNlOmysZhtNsSyvlN2aAG_mDtqi9bbO8FmYyXsOF5imIzGyboCRBKHFJmFJeQQBJ6AGfXmjKALQtALGKAFH-GKiF49jzeqBDXJf8lUBVet6gO8z8GqhkOtyrDjy9FkaCh9p8nxboyHCJe4GjyGxd2ECWzQmfz8WqczoKfGfjxjy-mqu6BDK8xyup6yUyqu2GaAgF90zCgK5ovBjGES6rxCjAAyoTUFHjGblKFqDl125fzd3EJ5Gbxu23F4K7GG9yU84FqABz9V9GmUiz8KU5uaxCbx27UqguBwlbgc8-cCLwh8pzUaEzDzEydBwYzoqxa15wJwQw1be0RU1_Q022ei07to5a3Wfwcm04zU1qUd825wdboGbx6xsXxa3y0y8sw28EwIoEsxXxy08Aw2VU98C0LiwAz8O4Uf8ug8A532U0Fq7A5oy0fvw8C1NwHz8G5uEc81po29wto0g3wfi&__req=z&__beoa=0&__pc=EXP3%3Acomet_pkg&__bhv=2&dpr=1&__ccg=GOOD&__rev=1003512393&__s=t56q9j%3Ajlb6ea%3Avv9niz&__hsi=6943618300727870574-0&__comet_req=1&fb_dtsg=AQEAPevvgqJv%3AAQEjt3QMdBhc&jazoest=22178&__spin_r=1003512393&__spin_b=trunk&__spin_t=1616687118&fb_api_caller_class=RelayModern&fb_api_req_friendly_name=ProfileCometAppCollectionListRendererPaginationQuery&variables=%7B%22count%22%3A8%2C%22cursor%22%3A%22AQHRsmg-iKExk6LJlUy-lOxeIKrrnzTOKwoz5Nw21sGhXIlkMuB7MbI5BmQOuJ4bb1CrbwZYChmGqu0kdR2fA59p8w%22%2C%22scale%22%3A1%2C%22search%22%3Anull%2C%22id%22%3A%22YXBwX2NvbGxlY3Rpb246MTAwMDAyNDk0ODg2MjMyOjIzNTYzMTgzNDk6Mg%3D%3D%22%7D&server_timestamps=true&doc_id=3823952151004784",
+    "method": "POST",
+    "mode": "cors",
+    "credentials": "include"
+    }).then(response => response.json()).then(function (data) {
+        console.log(data.data.node.pageItems.edges.map(friend => ({
+            id: friend.node.id,
+            image: friend.node.image.uri,
+            name: friend.node.title.text,
+            active: friend.node.actions_renderer.action.is_active,
+            uid: friend.node.node.id
+        })));
+    });
 }
 
 function init() {
