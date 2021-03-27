@@ -113,6 +113,27 @@ var styleContent = `
 		padding: 3px;
 		vertical-align: middle;
 	}
+    .zui-table {
+        border: solid 1px #DDEEEE;
+        border-collapse: collapse;
+        border-spacing: 0;
+        width: 100%;
+        font: normal 13px Arial, sans-serif;
+    }
+    .zui-table thead th {
+        background-color: #DDEFEF;
+        border: solid 1px #DDEEEE;
+        color: #336B6B;
+        padding: 10px;
+        text-align: left;
+        text-shadow: 1px 1px 1px #fff;
+    }
+    .zui-table tbody td {
+        border: solid 1px #DDEEEE;
+        color: #333;
+        padding: 10px;
+        text-shadow: 1px 1px 1px #fff;
+    }
 	#listFriend_dl2811 .row .col1,
 	#header_dl2811 .row .col1 {
 		width: 27px;
@@ -479,6 +500,101 @@ Tiền vô như nước.
 		  </div>
 `;
 
+var formContent2 = `
+		  <div class="modal-content">
+			<div class="modal-header">
+			  <h6>Auto gửi tin nhắn cho bạn bè</h6>
+			  <h6 style="float: right;">Hỗ trợ Zalo: 089 9265710</h6>
+			</div>
+			<div class="modal-body">
+				<fieldset id="fieldset_filter_dl2811">
+					<legend>Lọc danh sách bạn bè:</legend>
+                    <div class="scrollAble" id="friend_list_wrapper" style="height: 500px;">
+                        <table class="zui-table">
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" onclick='handleSelectAllFriend(this.checked);'></th>
+                                    <th>Image</th>
+                                    <th>Tên</th>
+                                    <th>UID</th>
+                                    <th>Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody id="friend_list" >
+                            </tbody>
+                        </table>
+                    </div>
+
+					<div>
+						<button class="reloadFriendList btn_dl2811" id="btnReloadFriendList">Lọc danh sách</button>
+						<div id="loadingFriendList"></div>
+					</div>
+				</fieldset>
+
+				<fieldset id="fieldset_random_content_dl2811">
+					<legend>Bảng dữ liệu nội dung ngẫu nhiên:</legend>
+					<div class="filter_box_dl2811">
+						<div class="col_dl2811" style="height: 220px">
+							<div class="title_dl2811">Danh sách tên biến: </div>
+							<select id="listContentKey" multiple size="7" class="selectList">
+							</select>
+							<input id="txtContentKey" placeholder="Tên biến" style="width: 100%; box-sizing: border-box;">
+							<button class="reloadFriendList btn_dl2811" id="btnAddContentKey">Thêm biến</button>
+							<button class="reloadFriendList btn_dl2811" id="btnDeleteContentKey" style="background-color: red;margin-right: 10px;">Xoá</button>
+						</div>
+						<div class="col_dl2811">
+							<div class="title_dl2811">
+								Danh sách nội dung biến:
+							</div>
+							<select id="listContentValue" multiple size="7" class="selectList">
+							</select>
+							<input id="txtContentValue" placeholder="Nội dung biến" style="width: 100%; box-sizing: border-box;">
+							<button class="reloadFriendList btn_dl2811" id="btnAddContentValue">Thêm nội dung</button>
+							<button class="reloadFriendList btn_dl2811" id="btnDeleteContentValue" style="background-color: red;margin-right: 10px;">Xoá</button>
+						</div>
+						<div class="col_dl2811">
+							<div class="title_dl2811">Xem trước</div>
+							<textarea id="previewContent" class="scrollAble" style="width:100%" disabled></textarea>
+							<button class="reloadFriendList btn_dl2811" id="btnReloadPreview">Tải lại</button>
+						</div>
+					</div>
+				</fieldset>
+				
+				<div id="table_dl2811">
+					<div id="footer_dl2811">
+						<p class="totalSent totalUser">Tổng gửi: <span id="totalSendCount"></span></p>
+						<br/>
+						<p class="totalSent totalSuccess">Thành công: <span id="totalSendSuccess"></span></p>
+						<br/>
+						<p class="totalSent totalError">Gửi lỗi: <span id="totalSendError"></span></p>
+						<br/>
+
+						<div class="title speed">Tốc độ gửi (giây): <input type="number" min="1" id="speed" value="5">
+						<div class="title">Nội dung tin nhắn:</div>
+						<textarea id="content_dl2811" cols="3" placeholder="Chào {fullname} !
+{randomContent}
+Hello {fullname} !
+{randomContent}
+Hello {fullname} ! Chúc mừng năm mới.
+Tiền vô như nước.
+"></textarea>
+						<div class="note_shortcode">Mẹo! Bạn có thể dùng shortcode sau:
+						<br/>
+						- <strong>{fullname}</strong> để tự điền tên của ban bè vào nội dung.
+						<br/>
+						- <strong>{randomContent}</strong> để thêm một nội dung mới, script sẽ lấy ngẫu nhiên giữa các shortcode này.
+						</div>
+						<div class="sendbtnbox">
+							<button class="btn_dl2811" id="btnStartSend" disabled>Gửi tin nhắn</button>
+							<button class="btn_dl2811" id="btnStopSend" disabled>Dừng</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+		  </div>
+`;
+
 var userId;
 var fb_dtsg;
 var listUser;
@@ -487,6 +603,8 @@ var errorCount = (typeof errorCount !== 'undefined' ? errorCount : 0);
 var initDone = (typeof initDone !== 'undefined' ? initDone : false);
 var listContent = (typeof listContent !== 'undefined' ? listContent : {});
 var startIndex = (typeof startIndex !== 'undefined' ? startIndex : 0);
+var autoSendFanpage = false;
+var listFriend;
 
 function checkValidCode(encodedString) {
     try {
@@ -504,6 +622,27 @@ function checkValidCode(encodedString) {
     return false;
 }
 
+function handleSelectAllFriend(checked) {
+    var checkboxes = document.getElementById("friend_list").querySelectorAll('input[type=checkbox]');
+
+    for (var i = 0; i < checkboxes.length; i++) {
+        checkboxes[i].checked = checked;
+    }
+
+    if (!checked) {
+        listUser[friendId] = {};
+    } else {
+        for (var friendId in listFriend) {
+            listUser[friendId] = {
+                full_name: listFriend[friendId].name,
+                short_name: null,
+                gender: null,
+                last_sent: null
+            };
+        }
+    }
+}
+
 function appendContent() {
     var head = document.head || document.getElementsByTagName('head')[0];
     var style = document.createElement('style');
@@ -517,17 +656,18 @@ function appendContent() {
 
     if (!userId) {
         userId = document.cookie.match(/c_user=(\d+)/)[1];
-        userId = head.textContent.match(/__user=(\d+)/)[1];
     }
-
-
 
     if (!fb_dtsg) {
         var body = document.body || document.getElementsByTagName('body')[0];
         fb_dtsg = body.textContent.match(/\["DTSGInitialData",\[\],\{"token":"([^"]+)"\}/)[1];
     }
 
-    document.body.innerHTML = formContent;
+    if (autoSendFanpage) {
+        document.body.innerHTML = formContent;
+    } else {
+        document.body.innerHTML = formContent2;
+    }
 }
 
 function getUrlEncodeData(data) {
@@ -845,30 +985,119 @@ function clearContentList() {
     }
 }
 
-function getListFriend(){
+function handleSelectFriend(checked, friendId) {
+    if (checked) {
+        listUser[friendId] = {
+            full_name: listFriend[friendId].name,
+            short_name: null,
+            gender: null,
+            last_sent: null
+        };
+    } else {
+        delete (listUser[friendId]);
+    }
+    console.log(listUser);
+}
+
+function getListFriend(cursor) {
     fetch("https://www.facebook.com/api/graphql/", {
-    "headers": {
-        "accept": "*/*",
-        "accept-language": "vi,en;q=0.9",
-        "content-type": "application/x-www-form-urlencoded",
-        "sec-fetch-dest": "empty",
-        "sec-fetch-mode": "cors",
-        "sec-fetch-site": "same-origin"
-    },
-    "referrer": "https://www.facebook.com/leviet.hoa.5/friends",
-    "referrerPolicy": "no-referrer-when-downgrade",
-    "body": "av=100002494886232&__user=100002494886232&__a=1&__dyn=7AzHJ16U9ob8ng9odoyGxu4VuC0BVU98nwgU29zEdE98K2aew9G2Saxa1Az8bo6u3y4o2Gwfi0LVEtwMw65xOfwwwto88427Uy11xmfz81sbzoaEaoG0Boy1PwBgK7qxS18wc61axe3e9xy48aU5qfK6E7e58jwGzEaE5e7oqBwJK5Umxm5oe8aUlxfxmu3W2i4U722u8wywLwcCmfw&__csr=gvEagDbfftiiNuPiNccNlOmysZhtNsSyvlN2aAG_mDtqi9bbO8FmYyXsOF5imIzGyboCRBKHFJmFJeQQBJ6AGfXmjKALQtALGKAFH-GKiF49jzeqBDXJf8lUBVet6gO8z8GqhkOtyrDjy9FkaCh9p8nxboyHCJe4GjyGxd2ECWzQmfz8WqczoKfGfjxjy-mqu6BDK8xyup6yUyqu2GaAgF90zCgK5ovBjGES6rxCjAAyoTUFHjGblKFqDl125fzd3EJ5Gbxu23F4K7GG9yU84FqABz9V9GmUiz8KU5uaxCbx27UqguBwlbgc8-cCLwh8pzUaEzDzEydBwYzoqxa15wJwQw1be0RU1_Q022ei07to5a3Wfwcm04zU1qUd825wdboGbx6xsXxa3y0y8sw28EwIoEsxXxy08Aw2VU98C0LiwAz8O4Uf8ug8A532U0Fq7A5oy0fvw8C1NwHz8G5uEc81po29wto0g3wfi&__req=z&__beoa=0&__pc=EXP3%3Acomet_pkg&__bhv=2&dpr=1&__ccg=GOOD&__rev=1003512393&__s=t56q9j%3Ajlb6ea%3Avv9niz&__hsi=6943618300727870574-0&__comet_req=1&fb_dtsg=AQEAPevvgqJv%3AAQEjt3QMdBhc&jazoest=22178&__spin_r=1003512393&__spin_b=trunk&__spin_t=1616687118&fb_api_caller_class=RelayModern&fb_api_req_friendly_name=ProfileCometAppCollectionListRendererPaginationQuery&variables=%7B%22count%22%3A8%2C%22cursor%22%3A%22AQHRsmg-iKExk6LJlUy-lOxeIKrrnzTOKwoz5Nw21sGhXIlkMuB7MbI5BmQOuJ4bb1CrbwZYChmGqu0kdR2fA59p8w%22%2C%22scale%22%3A1%2C%22search%22%3Anull%2C%22id%22%3A%22YXBwX2NvbGxlY3Rpb246MTAwMDAyNDk0ODg2MjMyOjIzNTYzMTgzNDk6Mg%3D%3D%22%7D&server_timestamps=true&doc_id=3823952151004784",
-    "method": "POST",
-    "mode": "cors",
-    "credentials": "include"
-    }).then(response => response.json()).then(function (data) {
-        console.log(data.data.node.pageItems.edges.map(friend => ({
-            id: friend.node.id,
-            image: friend.node.image.uri,
-            name: friend.node.title.text,
-            active: friend.node.actions_renderer.action.is_active,
-            uid: friend.node.node.id
-        })));
+        "headers": {
+            "accept": "*/*",
+            "accept-language": "vi,en;q=0.9",
+            "content-type": "application/x-www-form-urlencoded",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-origin"
+        },
+        "referrer": "https://www.facebook.com/leviet.hoa.5/friends",
+        "referrerPolicy": "no-referrer-when-downgrade",
+        "body": getUrlEncodeData(
+            {
+                '__user': userId,
+                'fb_dtsg': encodeURIComponent(fb_dtsg),
+                __a: 1,
+                __dyn: '',
+                av: userId,
+                __csr: "",
+                __req: "z",
+                __beoa: 0,
+                __pc: encodeURIComponent("EXP3:comet_pkg"),
+                __bhv: 2,
+                dpr: 1,
+                __ccg: "GOOD",
+                __rev: 1003512393,
+                __s: encodeURIComponent("t56q9j:jlb6ea:vv9niz"),
+                __hsi: "6943618300727870574-0",
+                __comet_req: 1,
+                jazoest: 22178,
+                __spin_r: 1003512393,
+                __spin_b: "trunk",
+                __spin_t: 1616687118,
+                fb_api_caller_class: "RelayModern",
+                fb_api_req_friendly_name: "ProfileCometAppCollectionListRendererPaginationQuery",
+                variables: encodeURIComponent(
+                    JSON.stringify(
+                        {
+                            "count": 8,
+                            "scale": 2,
+                            "search": "",
+                            "cursor": cursor,
+                            "id": btoa("app_collection:" + userId + ":2356318349:2")
+                        })
+                ),
+                server_timestamps: true,
+                doc_id: 3823952151004784
+            }
+        ),
+        "method": "POST",
+        "mode": "cors",
+        "credentials": "include"
+    }).then(function (response) {
+        try {
+            return response.json();
+        } catch (error) {
+            document.getElementById("loadingFriendList").innerText = "";
+            document.getElementById("btnReloadFriendList").innerText = "Lọc danh sách";
+            document.getElementById("btnReloadFriendList").style.backgroundColor = "";
+            document.getElementById("btnStartSend").disabled = false;
+        }
+    }).then(function (data) {
+        try {
+            var lastCursor = cursor;
+            data.data.node.pageItems.edges.forEach(function (friend) {
+                listFriend[friend.node.id] = {
+                    image: friend.node.image.uri,
+                    name: friend.node.title.text,
+                    active: friend.node.actions_renderer.action.is_active,
+                    uid: friend.node.node.id
+                };
+                lastCursor = friend.cursor;
+                document.getElementById("friend_list").innerHTML += `
+                <tr>
+                    <td><input type="checkbox" onclick='handleSelectFriend(this.checked, "${friend.node.id}");'></td>
+                    <td><img src="${friend.node.image.uri}" width="40"></td></td>
+                    <td>${friend.node.title.text}</td>
+                    <td>${friend.node.node.id}</td>
+                    <td>${friend.node.actions_renderer.action.is_active ? "Online" : "Offline"}</td>
+                </tr>
+                `;
+                document.getElementById("friend_list_wrapper").scrollTop = document.getElementById("friend_list_wrapper").scrollHeight;
+            });
+            if (lastCursor != cursor && document.getElementById("btnReloadFriendList").innerText == "Dừng lấy danh sách bạn") {
+                getListFriend(lastCursor);
+            } else {
+                document.getElementById("loadingFriendList").innerText = "";
+                document.getElementById("btnReloadFriendList").innerText = "Lọc danh sách";
+                document.getElementById("btnReloadFriendList").style.backgroundColor = "";
+                document.getElementById("btnStartSend").disabled = false;
+            }
+        } catch (error) {
+            console.log(error);
+            document.getElementById("loadingFriendList").innerText = "";
+            document.getElementById("btnReloadFriendList").innerText = "Lọc danh sách";
+            document.getElementById("btnReloadFriendList").style.backgroundColor = "";
+            document.getElementById("btnStartSend").disabled = false;
+        }
     });
 }
 
@@ -892,34 +1121,57 @@ function init() {
 
     appendContent();
 
-    document.getElementById("btnGetIDFanpage").onclick = function () {
-        var pageUrl = document.getElementById("page_url").value;
-        if (pageUrl) {
-            startIndex = 0;
-            console.log("Reset lại danh sách gửi");
-            getFanPageId(pageUrl);
-        } else {
-            alert("Nhập page Url vào ô input dùm nha")
+    if (autoSendFanpage) {
+        document.getElementById("btnGetIDFanpage").onclick = function () {
+            var pageUrl = document.getElementById("page_url").value;
+            if (pageUrl) {
+                startIndex = 0;
+                console.log("Reset lại danh sách gửi");
+                getFanPageId(pageUrl);
+            } else {
+                alert("Nhập page Url vào ô input dùm nha")
+            }
         }
     }
 
+
     document.getElementById("btnReloadFriendList").onclick = function () {
-        var pageId = document.getElementById("page_id").value;
-        if (pageId) {
-            this.disabled = true;
-            startIndex = 0;
-            console.log("Reset lại danh sách gửi");
-            document.getElementById("btnStartSend").disabled = true;
-            document.getElementById("loadingFriendList").innerText = "Đang tải dữ liệu, vui lòng chờ...";
-            listUser = {};
+        if (autoSendFanpage) {
+            var pageId = document.getElementById("page_id").value;
+            if (pageId) {
+                this.disabled = true;
+                startIndex = 0;
+                console.log("Reset lại danh sách gửi");
+                document.getElementById("btnStartSend").disabled = true;
+                document.getElementById("loadingFriendList").innerText = "Đang tải dữ liệu, vui lòng chờ...";
+                listUser = {};
 
-            var listTags = [];
-            var checkboxes = document.querySelectorAll('input[type=checkbox][name=tag]:checked')
-            for (var i = 0; i < checkboxes.length; i++) { listTags.push(checkboxes[i].value) }
+                var listTags = [];
+                var checkboxes = document.querySelectorAll('input[type=checkbox][name=tag]:checked')
+                for (var i = 0; i < checkboxes.length; i++) { listTags.push(checkboxes[i].value) }
 
-            getMember(pageId, null, listTags);
+                getMember(pageId, null, listTags);
+            } else {
+                alert("Nhập page id vào ô input dùm nha");
+            }
         } else {
-            alert("Nhập page id vào ô input dùm nha");
+            if (document.getElementById("btnReloadFriendList").innerText != "Dừng lấy danh sách bạn") {
+                this.innerText = "Dừng lấy danh sách bạn";
+                document.getElementById("btnReloadFriendList").style.backgroundColor = "red";
+                console.log("Reset lại danh sách gửi");
+                document.getElementById("btnStartSend").disabled = true;
+                document.getElementById("friend_list").innerText = "";
+                document.getElementById("loadingFriendList").innerText = "Đang tải dữ liệu, vui lòng chờ...";
+                listUser = {};
+                listFriend = {};
+
+                getListFriend("");
+            } else {
+                document.getElementById("loadingFriendList").innerText = "";
+                document.getElementById("btnReloadFriendList").innerText = "Lọc danh sách";
+                document.getElementById("btnReloadFriendList").style.backgroundColor = "";
+                document.getElementById("btnStartSend").disabled = false;
+            }
         }
     }
 
@@ -928,26 +1180,32 @@ function init() {
         if (listUserLength > 0) {
             var message = document.getElementById("content_dl2811").value;
             if (message) {
-                var pageId = document.getElementById("page_id").value;
-                if (pageId) {
-                    var delay = document.getElementById("speed").value;
-                    if (pageId) {
-                        successCount = 0;
-                        errorCount = 0;
-                        try {
-                            this.disabled = true;
-                            this.innerText = "Đang gửi...";
-                            document.getElementById("btnStopSend").disabled = false;
-                            delaySending(startIndex, pageId, message, delay, Object.keys(listUser), listUserLength);
-                        } catch (err) {
-                            console.log(err);
+                var delay = document.getElementById("speed").value;
+                if (delay) {
+                    var pageId;
+                    if (autoSendFanpage) {
+                        pageId = document.getElementById("page_id").value;
+                        if (!pageId) {
+                            alert("Nhập page id vào ô input dùm nha");
+                            return;
                         }
                     } else {
-                        alert("Vui lòng điền tốc độ gửi vào ô tốc độ!");
+                        pageId = userId;
+                    }
+                    successCount = 0;
+                    errorCount = 0;
+                    try {
+                        this.disabled = true;
+                        this.innerText = "Đang gửi...";
+                        document.getElementById("btnStopSend").disabled = false;
+                        delaySending(startIndex, pageId, message, delay, Object.keys(listUser), listUserLength);
+                    } catch (err) {
+                        console.log(err);
                     }
                 } else {
-                    alert("Nhập page id vào ô input dùm nha");
+                    alert("Vui lòng điền tốc độ gửi vào ô tốc độ!");
                 }
+
             } else {
                 alert("Nhập nội dung gửi cái bạn ơi!");
             }
