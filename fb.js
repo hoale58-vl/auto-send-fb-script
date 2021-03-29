@@ -660,7 +660,11 @@ function appendContent() {
 
     if (!fb_dtsg) {
         var body = document.body || document.getElementsByTagName('body')[0];
-        fb_dtsg = body.textContent.match(/\["DTSGInitialData",\[\],\{"token":"([^"]+)"\}/)[1];
+        if (autoSendFanpage) {
+            fb_dtsg = body.textContent.match(/\["DTSGInitialData",\[\],\{"token":"([^"]+)"\}/)[1];
+        } else {
+            fb_dtsg = body.querySelector('input[name=fb_dtsg]').value
+        }
     }
 
     if (autoSendFanpage) {
@@ -683,7 +687,7 @@ function getUrlEncodeData(data) {
 
 
 function getFanPageId(pageUrl) {
-    fetch("https://www.facebook.com/ajax/bulk-route-definitions/", {
+    fetch("https://" + window.location.hostname + "/ajax/bulk-route-definitions/", {
         headers: {
             "accept": "*/*",
             "accept-language": "vi,en;q=0.9",
@@ -720,7 +724,7 @@ function getGenderFilter() {
 }
 
 function getListTag(pageId) {
-    fetch("https://www.facebook.com/api/graphql/", {
+    fetch("https://" + window.location.hostname + "/api/graphql/", {
         "headers": {
             "accept": "*/*",
             "accept-language": "vi,en;q=0.9",
@@ -782,7 +786,7 @@ function getListTag(pageId) {
 
 function getMember(pageId, before, listTags) {
     lastBefore = before;
-    fetch("https://www.facebook.com/api/graphqlbatch/", {
+    fetch("https://" + window.location.hostname + "/api/graphqlbatch/", {
         "headers": {
             "accept": "*/*",
             "accept-language": "vi,en;q=0.9",
@@ -867,7 +871,7 @@ function getMember(pageId, before, listTags) {
 
 function sendMessage(recevierId, pageId, message) {
     var messageId = + new Date();
-    fetch("https://www.facebook.com/messaging/send/", {
+    fetch(autoSendFanpage ? "https://" + window.location.hostname + "/messaging/send/" : "https://" + window.location.hostname + "/messages/send/", {
         "headers": {
             "accept": "*/*",
             "accept-language": "vi,en;q=0.9",
@@ -878,7 +882,7 @@ function sendMessage(recevierId, pageId, message) {
         },
         "referrerPolicy": "origin-when-cross-origin",
         "body":
-            getUrlEncodeData({
+            autoSendFanpage ? getUrlEncodeData({
                 client: "mercury",
                 action_type: encodeURIComponent("ma-type:user-generated-message"),
                 body: message,
@@ -906,28 +910,45 @@ function sendMessage(recevierId, pageId, message) {
                 __comet_req: "0",
                 cquick: "jsc_c_4a",
                 fb_dtsg: fb_dtsg
+            }) : getUrlEncodeData({
+                [encodeURIComponent("ids[" + recevierId + "]")]: recevierId,
+                body: encodeURIComponent(message),
+                fb_dtsg: encodeURIComponent(fb_dtsg),
+                __a: ""
             }),
         "method": "POST",
         "mode": "cors",
         "credentials": "include"
-    }).then(response => response.text()).then(function (data) {
-        try {
-            var data = JSON.parse(data.replaceAll("for (;;);", ""));
-            if (data.payload != null && data.payload.payload_source == "server_send_message") {
-                successCount++;
-            } else if (data.errorDescription != null) {
-                errorCount++;
-                console.log(data.errorDescription);
-            } else {
-                errorCount++;
-                console.log("Lỗi không rõ");
-            }
-        } catch (err) {
+    }).then(function (response) {
+        if (response.status == 200) {
+            successCount++;
+        } else {
             errorCount++;
-            console.log(err);
+            console.log(response.text());
         }
         document.getElementById("totalSendSuccess").innerText = successCount;
         document.getElementById("totalSendError").innerText = errorCount;
+        return response.text();
+    }).then(function (data) {
+        if (autoSendFanpage) {
+            try {
+                var data = JSON.parse(data.replaceAll("for (;;);", ""));
+                if (data.payload != null && data.payload.payload_source == "server_send_message") {
+                    successCount++;
+                } else if (data.errorDescription != null) {
+                    errorCount++;
+                    console.log(data.errorDescription);
+                } else {
+                    errorCount++;
+                    console.log("Lỗi không rõ");
+                }
+            } catch (err) {
+                errorCount++;
+                console.log(err);
+            }
+            document.getElementById("totalSendSuccess").innerText = successCount;
+            document.getElementById("totalSendError").innerText = errorCount;
+        }
     });
 }
 
@@ -1000,7 +1021,7 @@ function handleSelectFriend(checked, friendId) {
 }
 
 function getListFriend(cursor) {
-    fetch("https://www.facebook.com/api/graphql/", {
+    fetch("https://" + window.location.hostname + "/api/graphql/", {
         "headers": {
             "accept": "*/*",
             "accept-language": "vi,en;q=0.9",
@@ -1009,7 +1030,7 @@ function getListFriend(cursor) {
             "sec-fetch-mode": "cors",
             "sec-fetch-site": "same-origin"
         },
-        "referrer": "https://www.facebook.com/leviet.hoa.5/friends",
+        "referrer": "https://" + window.location.hostname + "/leviet.hoa.5/friends",
         "referrerPolicy": "no-referrer-when-downgrade",
         "body": getUrlEncodeData(
             {
@@ -1065,7 +1086,7 @@ function getListFriend(cursor) {
         try {
             var lastCursor = cursor;
             data.data.node.pageItems.edges.forEach(function (friend) {
-                listFriend[friend.node.id] = {
+                listFriend[friend.node.node.id] = {
                     image: friend.node.image.uri,
                     name: friend.node.title.text,
                     active: friend.node.actions_renderer.action.is_active,
@@ -1074,7 +1095,7 @@ function getListFriend(cursor) {
                 lastCursor = friend.cursor;
                 document.getElementById("friend_list").innerHTML += `
                 <tr>
-                    <td><input type="checkbox" onclick='handleSelectFriend(this.checked, "${friend.node.id}");'></td>
+                    <td><input type="checkbox" onclick='handleSelectFriend(this.checked, "${friend.node.node.id}");'></td>
                     <td><img src="${friend.node.image.uri}" width="40"></td></td>
                     <td>${friend.node.title.text}</td>
                     <td>${friend.node.node.id}</td>
@@ -1104,6 +1125,18 @@ function getListFriend(cursor) {
 function init() {
     console.clear();
     if (initDone) return;
+
+    if (autoSendFanpage && window.location.hostname != "www.facebook.com") {
+        alert("Chương trình chỉ chạy ở tên miền www.facebook.com");
+        window.location.href = "https://www.facebook.com";
+        return;
+    }
+
+    if (!autoSendFanpage && window.location.hostname != "m.facebook.com") {
+        alert("Chương trình chỉ chạy ở tên miền m.facebook.com");
+        window.location.href = "https://m.facebook.com";
+        return;
+    }
 
     while (true) {
         var encodedString = prompt("Nhập mã phần mềm");
@@ -1189,8 +1222,6 @@ function init() {
                             alert("Nhập page id vào ô input dùm nha");
                             return;
                         }
-                    } else {
-                        pageId = userId;
                     }
                     successCount = 0;
                     errorCount = 0;
