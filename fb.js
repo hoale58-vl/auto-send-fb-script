@@ -531,6 +531,12 @@ var formContent2 = `
 					</div>
 				</fieldset>
 
+                <fieldset id="fieldset_random_content_dl2811">
+					<legend>Thêm user bằng tay:</legend>
+                    <input id="txtAddUserId" placeholder="UserId" style="width: 100%; box-sizing: border-box;">
+                    <button class="reloadFriendList btn_dl2811" id="btnAddUserId">Thêm user</button>
+				</fieldset>
+
 				<fieldset id="fieldset_random_content_dl2811">
 					<legend>Bảng dữ liệu nội dung ngẫu nhiên:</legend>
 					<div class="filter_box_dl2811">
@@ -639,6 +645,10 @@ function handleSelectAllFriend(checked) {
                 gender: null,
                 last_sent: null
             };
+        }
+
+        if (Object.keys(listUser).length > 0 && document.getElementById("loadingFriendList").innerText == "") {
+            document.getElementById("btnStartSend").disabled = false;
         }
     }
 }
@@ -1014,6 +1024,9 @@ function handleSelectFriend(checked, friendId) {
             gender: null,
             last_sent: null
         };
+        if (Object.keys(listUser).length > 0 && document.getElementById("loadingFriendList").innerText == "") {
+            document.getElementById("btnStartSend").disabled = false;
+        }
     } else {
         delete (listUser[friendId]);
     }
@@ -1263,6 +1276,38 @@ function init() {
             }
         } else {
             alert("Nhập tên biến vào ô input dùm nha");
+        }
+    }
+
+    document.getElementById("btnAddUserId").onclick = function () {
+        var contentKey = document.getElementById("txtAddUserId").value;
+        if (contentKey && contentKey.trim()) {
+            if (typeof listFriend === 'undefined') {
+                listFriend = {};
+            }
+            if (typeof listUser === 'undefined') {
+                listUser = {};
+            }
+            if (!(contentKey in listFriend)) {
+                listFriend[contentKey] = {
+                    image: "https://av.olm.vn/images/avt/avt3/avt485653_256by256.jpg",
+                    name: "User_" + contentKey,
+                    active: "Unknown",
+                    uid: contentKey
+                };
+                document.getElementById("friend_list").innerHTML += `
+                <tr>
+                    <td><input type="checkbox" onclick='handleSelectFriend(this.checked, "${contentKey}");'></td>
+                    <td><img src="https://av.olm.vn/images/avt/avt3/avt485653_256by256.jpg" width="40"></td></td>
+                    <td>User_${contentKey}</td>
+                    <td>${contentKey}</td>
+                    <td>Unknown</td>
+                </tr>
+                `;
+                document.getElementById("friend_list_wrapper").scrollTop = document.getElementById("friend_list_wrapper").scrollHeight;
+            }
+        } else {
+            alert("Nhập tên user vào ô input dùm nha");
         }
     }
 
