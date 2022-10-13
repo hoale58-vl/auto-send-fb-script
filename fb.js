@@ -385,9 +385,6 @@ var formContent = `
 				<fieldset id="fieldset_page_box_dl2811">
 					<legend>Thông tin Fanpage:</legend>
 					<div class="page_box_dl2811">
-						<div class="col_dl2811">
-							<input type="url" id="page_url" value="" placeholder="Link fanpage">
-						</div>
 						<div class="col_dl2811 text-center">
 							<div class="btnGetIDFanpage" id="btnGetIDFanpage">&gt;&gt; Lấy ID Fanpage &gt;&gt;</div>
 						</div>
@@ -412,14 +409,30 @@ var formContent = `
 							<div class="title_dl2811">
 								Giới tính:
 							</div>
-							<input type="radio" name="gender" value="all" checked="checked">
-							<label for="all">Tất cả</label>
+                            <div>
+                                <input type="radio" name="gender" value="all" checked="checked">
+                                <label for="all">Tất cả</label>
+                            </div>
 
-							<input type="radio" name="gender" value="MALE">
-							<label for="male">Nam</label>
+                            <div>
+                                <input type="radio" name="gender" value="MALE">
+                                <label for="male">Nam</label>
+                            </div>
 
-							<input type="radio" name="gender" value="FEMALE">
-							<label for="female">Nữ</label>
+                            <div>
+                                <input type="radio" name="gender" value="FEMALE">
+                                <label for="female">Nữ</label>
+                            </div>
+
+                            <div>
+                                <input type="radio" name="gender" value="NEUTER">
+                                <label for="NEUTER">LGBT</label>
+                            </div>
+
+                            <div>
+                                <input type="radio" name="gender" value="others">
+                                <label for="others">Người dùng bị block</label>
+                            </div>
 						</div>
 						<div class="col_dl2811">
 							<div class="title_dl2811">
@@ -474,7 +487,7 @@ var formContent = `
 						<p class="totalSent totalError">Gửi lỗi: <span id="totalSendError"></span></p>
 						<br/>
 
-						<div class="title speed">Tốc độ gửi (giây): <input type="number" min="1" id="speed" value="5">
+						<div class="title speed">Tốc độ gửi (giây): <input type="number" min="1" id="speed" value="100"/> - <input type="number" min="1" id="speed2" value="200">
 						<div class="title">Nội dung tin nhắn:</div>
 						<textarea id="content_dl2811" cols="3" placeholder="Chào {fullname} !
 {randomContent}
@@ -609,7 +622,7 @@ var errorCount = (typeof errorCount !== 'undefined' ? errorCount : 0);
 var initDone = (typeof initDone !== 'undefined' ? initDone : false);
 var listContent = (typeof listContent !== 'undefined' ? listContent : {});
 var startIndex = (typeof startIndex !== 'undefined' ? startIndex : 0);
-var autoSendFanpage = false;
+var autoSendFanpage = true;
 var listFriend;
 
 function checkValidCode(encodedString) {
@@ -669,11 +682,11 @@ function appendContent() {
     }
 
     if (!fb_dtsg) {
-        var body = document.body || document.getElementsByTagName('body')[0];
+        var content = document.documentElement.innerHTML;
         if (autoSendFanpage) {
-            fb_dtsg = body.textContent.match(/\["DTSGInitialData",\[\],\{"token":"([^"]+)"\}/)[1];
+            fb_dtsg = content.match(/\["DTSGInitialData",\[\],\{"token":"([^"]+)"\}/)[1];
         } else {
-            fb_dtsg = body.querySelector('input[name=fb_dtsg]').value
+            fb_dtsg = content.querySelector('input[name=fb_dtsg]').value
         }
     }
 
@@ -695,34 +708,6 @@ function getUrlEncodeData(data) {
     return formBody;
 }
 
-
-function getFanPageId(pageUrl) {
-    fetch("https://" + window.location.hostname + "/ajax/bulk-route-definitions/", {
-        headers: {
-            "accept": "*/*",
-            "accept-language": "vi,en;q=0.9",
-            "content-type": "application/x-www-form-urlencoded",
-            "sec-fetch-dest": "empty",
-            "sec-fetch-mode": "cors",
-            "sec-fetch-site": "same-origin"
-        },
-        "referrerPolicy": "strict-origin-when-cross-origin",
-        "method": "POST",
-        "mode": "cors",
-        "credentials": "include",
-        body: getUrlEncodeData(
-            {
-                'route_urls[0]': encodeURIComponent(pageUrl),
-                '__user': userId,
-                'fb_dtsg': fb_dtsg
-            }
-        )
-    }).then(response => response.text()).then(function (data) {
-        var pageId = JSON.parse(data.replaceAll("for (;;);", "")).payload.payloads[pageUrl].result.exports.actorID;
-        document.getElementById("page_id").value = pageId;
-        getListTag(pageId);
-    });
-}
 
 function getGenderFilter() {
     var radios = document.getElementsByName('gender');
@@ -854,8 +839,17 @@ function getMember(pageId, before, listTags) {
                 return node.related_page_thread.custom_thread_labels.nodes.find((label) => listTags.includes(label.id)) != null;
             }
         ).forEach(function (node) {
-            var user = node.all_participants.edges.filter(_user => _user.node.messaging_actor.__typename === 'User'
-                && (genderFilter == "all" || genderFilter == _user.node.messaging_actor.gender));
+            var user = node.all_participants.edges.filter(_user => 
+                (
+                    _user.node.messaging_actor.__typename === 'User'
+                    && (
+                        genderFilter === "all" || 
+                        genderFilter === _user.node.messaging_actor.gender // FEMALE, MALE, NEUTER
+                    )
+                ) 
+                || (_user.node.messaging_actor.__typename === 'UnavailableMessagingActor' && genderFilter === "others")
+            );
+            before = node.updated_time_precise - 1;
             if (user.length > 0) {
                 listUser[node.thread_key.other_user_id] = {
                     full_name: user[0].node.messaging_actor.name,
@@ -863,12 +857,11 @@ function getMember(pageId, before, listTags) {
                     gender: user[0].node.messaging_actor.gender,
                     last_sent: node.updated_time_precise
                 };
-                before = node.updated_time_precise - 1;
             } else {
                 return false;
             }
         });
-        if (listNode.length > 0 && before != null && lastBefore != before) {
+        if (before != null && lastBefore != before) {
             getMember(pageId, before, listTags);
         } else {
             document.getElementById("loadingFriendList").innerText = "";
@@ -977,7 +970,7 @@ function replacedText(message) {
     return replacedMessage;
 }
 
-function delaySending(count, pageId, message, delaySecond, keys, listUserLength) {
+function delaySending(count, pageId, message, speed, speed2, keys, listUserLength) {
     if (count >= listUserLength || !document.getElementById("btnStartSend").disabled) {
         if (count >= listUserLength) {
             startIndex = 0;
@@ -994,13 +987,19 @@ function delaySending(count, pageId, message, delaySecond, keys, listUserLength)
     }
     var replacedMessage = message.replaceAll("{fullname}", listUser[keys[count]].full_name);
     replacedMessage = replacedText(replacedMessage);
+    var replacedMessageArr = replacedMessage.split(`
+---
+`);
+    replacedMessage = replacedMessageArr[count % replacedMessageArr.length];
     sendMessage(keys[count], pageId, replacedMessage);
     console.log({
         "count": count, "message": replacedMessage
     });
+    var delay = getRandomInt(speed, speed2);
+    console.log("Delay: ", delay);
     setTimeout(function () {
-        delaySending(count + 1, pageId, message, delaySecond, keys, listUserLength);
-    }, delaySecond * 1000);
+        delaySending(count + 1, pageId, message, speed, speed2, keys, listUserLength);
+    }, delay * 1000);
 }
 
 function refreshPreview() {
@@ -1135,48 +1134,44 @@ function getListFriend(cursor) {
     });
 }
 
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min) + min); // The maximum is exclusive and the minimum is inclusive
+}
+
 function init() {
     console.clear();
     if (initDone) return;
 
-    if (autoSendFanpage && window.location.hostname != "www.facebook.com") {
-        alert("Chương trình chỉ chạy ở tên miền www.facebook.com");
-        window.location.href = "https://www.facebook.com";
-        return;
-    }
+    // if (autoSendFanpage && window.location.hostname != "business.facebook.com") {
+    //     alert("Chương trình chỉ chạy ở tên miền www.facebook.com");
+    //     window.location.href = "https://business.facebook.com";
+    //     return;
+    // }
 
-    if (!autoSendFanpage && window.location.hostname != "m.facebook.com") {
-        alert("Chương trình chỉ chạy ở tên miền m.facebook.com");
-        window.location.href = "https://m.facebook.com";
-        return;
-    }
-
-    while (true) {
-        var encodedString = prompt("Nhập mã phần mềm");
-        if (encodedString == null) {
-            return;
-        }
-        if (encodedString == "") {
-            alert("Vui lòng nhập mã để sử dụng phần mềm");
-            continue;
-        }
-        if (checkValidCode(encodedString)) {
-            break;
-        }
-    }
+    // while (true) {
+    //     var encodedString = prompt("Nhập mã phần mềm");
+    //     if (encodedString == null) {
+    //         return;
+    //     }
+    //     if (encodedString == "") {
+    //         alert("Vui lòng nhập mã để sử dụng phần mềm");
+    //         continue;
+    //     }
+    //     if (checkValidCode(encodedString)) {
+    //         break;
+    //     }
+    // }
 
     appendContent();
 
     if (autoSendFanpage) {
         document.getElementById("btnGetIDFanpage").onclick = function () {
-            var pageUrl = document.getElementById("page_url").value;
-            if (pageUrl) {
-                startIndex = 0;
-                console.log("Reset lại danh sách gửi");
-                getFanPageId(pageUrl);
-            } else {
-                alert("Nhập page Url vào ô input dùm nha")
-            }
+            const urlParams = new URLSearchParams(window.location.search);
+            const businessId = urlParams.get('asset_id');
+            getListTag(businessId);
+            document.getElementById("page_id").value = businessId;
         }
     }
 
@@ -1226,8 +1221,9 @@ function init() {
         if (listUserLength > 0) {
             var message = document.getElementById("content_dl2811").value;
             if (message) {
-                var delay = document.getElementById("speed").value;
-                if (delay) {
+                var speed = document.getElementById("speed").value;
+                var speed2 = document.getElementById("speed2").value;
+                if (speed && speed2) {
                     var pageId;
                     if (autoSendFanpage) {
                         pageId = document.getElementById("page_id").value;
@@ -1242,7 +1238,7 @@ function init() {
                         this.disabled = true;
                         this.innerText = "Đang gửi...";
                         document.getElementById("btnStopSend").disabled = false;
-                        delaySending(startIndex, pageId, message, delay, Object.keys(listUser), listUserLength);
+                        delaySending(startIndex, pageId, message, speed, speed2, Object.keys(listUser), listUserLength);
                     } catch (err) {
                         console.log(err);
                     }
